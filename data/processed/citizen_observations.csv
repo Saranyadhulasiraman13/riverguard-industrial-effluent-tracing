@@ -1,0 +1,4 @@
+timestamp,location,observation_type,description
+2025-01-01T08:00:00Z,Mill Bridge,water_colour,Cloudy water reported near the mid-reach bridge
+2025-01-02T12:00:00Z,East Meadow,odour,Unusual metallic odour reported downstream
+2025-01-03T12:00:00Z,Upper Reach,water_colour,Brown water reported near the upper reach

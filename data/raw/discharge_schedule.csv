@@ -1,0 +1,4 @@
+unit_id,discharge_start,discharge_end,discharge_status
+U1,2025-01-01T07:00:00Z,2025-01-01T09:00:00Z,scheduled
+U2,2025-01-02T11:00:00Z,2025-01-02T13:00:00Z,scheduled
+U3,2025-01-03T11:00:00Z,2025-01-03T13:00:00Z,scheduled

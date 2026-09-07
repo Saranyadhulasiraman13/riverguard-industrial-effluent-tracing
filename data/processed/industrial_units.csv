@@ -1,0 +1,4 @@
+unit_id,unit_name,station_id,industry_type
+U1,Northside Textiles,S1,textile_processing
+U2,Central Metalworks,S2,metal_finishing
+U3,South Valley Foods,S3,food_processing

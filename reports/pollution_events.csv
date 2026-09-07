@@ -1,0 +1,8 @@
+event_id,start_time,end_time,station_id,peak_value,affected_parameter,duration,severity
+PE0001,2025-01-03T12:00:00Z,2025-01-03T12:00:00Z,S1,21.0,turbidity_ntu,0 days,critical
+PE0002,2025-01-01T12:00:00Z,2025-01-01T12:00:00Z,S2,18.5,turbidity_ntu,0 days,critical
+PE0003,2025-01-02T12:00:00Z,2025-01-02T12:00:00Z,S2,19.5,turbidity_ntu,0 days,critical
+PE0004,2025-01-01T12:00:00Z,2025-01-01T12:00:00Z,S3,22.0,turbidity_ntu,0 days,critical
+PE0005,2025-01-02T12:00:00Z,2025-01-02T12:00:00Z,S3,28.0,turbidity_ntu,0 days,critical
+PE0006,2025-01-01T12:00:00Z,2025-01-01T12:00:00Z,S4,17.5,turbidity_ntu,0 days,critical
+PE0007,2025-01-02T12:00:00Z,2025-01-02T12:00:00Z,S4,24.5,turbidity_ntu,0 days,critical

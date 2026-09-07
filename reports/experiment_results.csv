@@ -1,0 +1,27 @@
+phase,metric,value,status,explanation,error_category
+baseline,total_readings,48,measured,Rows evaluated by the sensor-only baseline.,
+baseline,anomaly_readings,11,measured,Readings above the fixed turbidity threshold.,
+baseline,anomaly_rate,0.22916666666666666,proxy,Rate of threshold-flagged readings; no labelled truth is available.,
+baseline,precision,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
+baseline,recall,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
+baseline,f1,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
+improved,total_readings,48,measured,Rows evaluated by the historical anomaly detector.,
+improved,anomaly_readings,7,measured,Readings flagged by the historical rolling-IQR detector.,
+improved,pollution_events,7,proxy,Event count produced by grouping nearby anomalies; no labelled event truth is available.,
+improved,anomaly_rate,0.14583333333333334,proxy,Rate of historically flagged readings; no labelled truth is available.,
+improved,precision,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
+improved,recall,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
+improved,f1,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
+source_tracing,source_ranking_success_rate,0.8571428571428571,proxy,Share of events with at least one flow-supported medium/high-confidence inspection candidate.,
+source_tracing,untraceable_event_rate,0.14285714285714285,proxy,Share of events without a flow-supported medium/high-confidence candidate.,
+source_tracing,traceable_events,6,proxy,Count of events with at least one flow-supported inspection candidate.,
+source_tracing,untraceable_events,1,proxy,Count of events without a flow-supported inspection candidate.,
+source_tracing,ranked_source_candidates,21,measured,Number of source candidates ranked by the executed source-tracing pipeline.,
+source_tracing,top1_accuracy,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
+source_tracing,top3_coverage,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
+source_tracing,false_attribution_rate,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
+evaluation,ground_truth_available,False,measured,The available datasets contain no validated anomaly or source ground-truth labels.,
+evaluation,interpretation,"No validated ground truth is available; source rankings are plausible inspection candidates, not confirmed causal attribution.",documented,"No validated ground truth is available; source rankings are plausible inspection candidates, not confirmed causal attribution.",
+edge_case,missing_sensor_data,PASS,passed,Insufficient sensor data.,missing_sensor_data
+edge_case,no_matching_discharge,PASS,passed,"Pollution anomaly detected, but no plausible scheduled discharge source was identified. Recommend manual inspection.",no_scheduled_discharge
+edge_case,missing_or_conflicting_flow,PASS,passed,Flow direction unavailable or uncertain. Source attribution confidence reduced.,flow_uncertain

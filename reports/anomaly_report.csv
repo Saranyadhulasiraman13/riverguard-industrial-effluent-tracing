@@ -1,0 +1,8 @@
+event_id,timestamp,station_id,parameter,observed_value,expected_baseline,anomaly_score,severity,reason
+PE0002,2025-01-01T12:00:00Z,S2,turbidity_ntu,18.5,5.300000000000001,131.9999999999993,critical,Observed turbidity_ntu is substantially above the recent historical baseline.
+PE0004,2025-01-01T12:00:00Z,S3,turbidity_ntu,22.0,5.55,329.000000000007,critical,Observed turbidity_ntu is substantially above the recent historical baseline.
+PE0006,2025-01-01T12:00:00Z,S4,turbidity_ntu,17.5,5.800000000000001,116.99999999999937,critical,Observed turbidity_ntu is substantially above the recent historical baseline.
+PE0003,2025-01-02T12:00:00Z,S2,turbidity_ntu,19.5,5.5,93.33333333333367,critical,Observed turbidity_ntu is substantially above the recent historical baseline.
+PE0005,2025-01-02T12:00:00Z,S3,turbidity_ntu,28.0,5.9,220.99999999999883,critical,Observed turbidity_ntu is substantially above the recent historical baseline.
+PE0007,2025-01-02T12:00:00Z,S4,turbidity_ntu,24.5,6.2,183.00000000000065,critical,Observed turbidity_ntu is substantially above the recent historical baseline.
+PE0001,2025-01-03T12:00:00Z,S1,turbidity_ntu,21.0,5.1,158.99999999999915,critical,Observed turbidity_ntu is substantially above the recent historical baseline.

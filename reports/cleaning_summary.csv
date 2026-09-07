@@ -1,0 +1,8 @@
+dataset,input_rows,output_rows,missing_before,missing_after,duplicates_before,duplicates_removed,duplicates_after,timestamps_fixed,timestamps_removed,numerical_values_imputed,invalid_values_detected,suspicious_extreme_values_retained
+sensors,4,4,0,0,0,0,0,0,0,0,0,0
+sensor_readings,48,48,0,0,0,0,0,0,0,0,0,11
+flow_direction,36,36,0,0,0,0,0,0,0,0,0,0
+industrial_units,3,3,0,0,0,0,0,0,0,0,0,0
+discharge_schedule,3,3,0,0,0,0,0,0,0,0,0,0
+unit_operations,9,9,0,0,0,0,0,0,0,0,0,0
+citizen_observations,3,3,0,0,0,0,0,0,0,0,0,0

@@ -1,0 +1,5 @@
+station_id,station_name,river_name,latitude,longitude
+S1,Upper Reach,Willow River,51.5000,-0.1200
+S2,Mill Bridge,Willow River,51.4900,-0.1050
+S3,East Meadow,Willow River,51.4800,-0.0900
+S4,Lower Gauge,Willow River,51.4700,-0.0750

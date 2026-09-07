@@ -1,0 +1,8 @@
+upstream_weight: 0.30
+discharge_timing_weight: 0.30
+operation_weight: 0.20
+sensor_relationship_weight: 0.20
+
+# Confidence is based on the weighted score, not proof of causation.
+high_confidence_threshold: 0.75
+medium_confidence_threshold: 0.45
