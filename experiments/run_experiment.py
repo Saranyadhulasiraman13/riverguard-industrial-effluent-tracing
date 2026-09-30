@@ -11,26 +11,38 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.anomaly_detection import run_anomaly_pipeline, run_baseline_detector
 from src.anomaly_detection import load_sensor_readings
+from src.data_cleaning import run_cleaning_pipeline
+from src.citizen_observations import write_observation_reports
 from src.evaluation import build_experiment_results, save_experiment_results
 from src.source_tracing import run_source_tracing
 
 
 def run_experiment() -> object:
 	"""Evaluate sensor-only detection against the full prototype pipeline."""
+	report_dir = PROJECT_ROOT / "reports"
+	run_cleaning_pipeline(
+		data_dir=PROJECT_ROOT / "data" / "raw",
+		output_dir=PROJECT_ROOT / "data" / "processed",
+		summary_path=report_dir / "cleaning_summary.csv",
+	)
 	readings = load_sensor_readings()
 	baseline, _, _ = run_baseline_detector(
 		readings,
-		output_path=Path("reports") / "baseline_anomalies.csv",
+		output_path=report_dir / "baseline_anomalies.csv",
 	)
-	after = run_anomaly_pipeline(readings)
-	ranking = run_source_tracing(events=after["pollution_events"])
+	after = run_anomaly_pipeline(readings, report_path=report_dir / "anomaly_report.csv")
+	write_observation_reports(after["pollution_events"], reports_dir=report_dir)
+	ranking = run_source_tracing(
+		events=after["pollution_events"],
+		output_path=report_dir / "source_ranking.csv",
+	)
 	results = build_experiment_results(
 		baseline,
 		after["improved_anomalies"],
 		after["pollution_events"],
 		ranking,
 	)
-	path = save_experiment_results(results)
+	path = save_experiment_results(results, path=report_dir / "experiment_results.csv")
 	processed_dir = PROJECT_ROOT / "data" / "processed"
 	data_summary = {
 		file.stem: len(pd.read_csv(file)) for file in sorted(processed_dir.glob("*.csv"))

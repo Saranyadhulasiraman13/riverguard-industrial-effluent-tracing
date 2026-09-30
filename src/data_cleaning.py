@@ -70,7 +70,9 @@ def _normalize_categories(dataset_name: str, frame: pd.DataFrame) -> pd.DataFram
 	"""Trim text and canonicalize only known IDs and categorical fields."""
 	cleaned = frame.copy()
 	for column in cleaned.select_dtypes(include="object"):
-		cleaned[column] = cleaned[column].str.strip()
+		cleaned[column] = cleaned[column].map(
+			lambda value: value.strip() if isinstance(value, str) else value
+		)
 	for column in UPPERCASE_COLUMNS.get(dataset_name, []):
 		cleaned[column] = cleaned[column].str.upper()
 	for column in LOWERCASE_COLUMNS.get(dataset_name, []):

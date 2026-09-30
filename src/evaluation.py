@@ -46,20 +46,71 @@ def evaluate_detection(
 	total_readings = len(baseline)
 	baseline_count = int(baseline["anomaly"].sum())
 	improved_count = len(improved_anomalies)
+	baseline_rate = baseline_count / total_readings if total_readings else None
+	improved_rate = improved_count / total_readings if total_readings else None
+	count_change = improved_count - baseline_count
+	rate_change = (
+		improved_rate - baseline_rate
+		if improved_rate is not None and baseline_rate is not None
+		else None
+	)
+	relative_count_change = count_change / baseline_count if baseline_count else None
 	return [
+		_metric(
+			"baseline",
+			"feature_scope",
+			"Sensor readings only",
+			"documented",
+			"The baseline detector does not use flow direction, discharge schedules, or unit operations.",
+		),
 		_metric("baseline", "total_readings", total_readings, "measured", "Rows evaluated by the sensor-only baseline."),
 		_metric("baseline", "anomaly_readings", baseline_count, "measured", "Readings above the fixed turbidity threshold."),
-		_metric("baseline", "anomaly_rate", baseline_count / total_readings if total_readings else None, "proxy", "Rate of threshold-flagged readings; no labelled truth is available."),
+		_metric("baseline", "anomaly_rate", baseline_rate, "proxy", "Rate of threshold-flagged readings; no labelled truth is available."),
 		_metric("baseline", "precision", "not_available", "not_available", NO_GROUND_TRUTH),
 		_metric("baseline", "recall", "not_available", "not_available", NO_GROUND_TRUTH),
 		_metric("baseline", "f1", "not_available", "not_available", NO_GROUND_TRUTH),
+		_metric(
+			"improved",
+			"detector_scope",
+			"Historical rolling-IQR over sensor readings",
+			"documented",
+			"Flow, discharge, and operating data do not alter anomaly detection; they are used by subsequent source ranking.",
+		),
 		_metric("improved", "total_readings", total_readings, "measured", "Rows evaluated by the historical anomaly detector."),
 		_metric("improved", "anomaly_readings", improved_count, "measured", "Readings flagged by the historical rolling-IQR detector."),
 		_metric("improved", "pollution_events", len(pollution_events), "proxy", "Event count produced by grouping nearby anomalies; no labelled event truth is available."),
-		_metric("improved", "anomaly_rate", improved_count / total_readings if total_readings else None, "proxy", "Rate of historically flagged readings; no labelled truth is available."),
+		_metric("improved", "anomaly_rate", improved_rate, "proxy", "Rate of historically flagged readings; no labelled truth is available."),
 		_metric("improved", "precision", "not_available", "not_available", NO_GROUND_TRUTH),
 		_metric("improved", "recall", "not_available", "not_available", NO_GROUND_TRUTH),
 		_metric("improved", "f1", "not_available", "not_available", NO_GROUND_TRUTH),
+		_metric(
+			"prototype",
+			"source_tracing_inputs",
+			"Flow direction, discharge timing, and industrial operating status",
+			"documented",
+			"These contextual inputs support candidate source ranking after sensor anomaly detection.",
+		),
+		_metric(
+			"comparison",
+			"anomaly_reading_count_change",
+			count_change,
+			"proxy",
+			"Historical detector count minus baseline count; a descriptive change, not a ground-truth accuracy measure.",
+		),
+		_metric(
+			"comparison",
+			"anomaly_rate_change",
+			rate_change,
+			"proxy",
+			"Historical detector rate minus baseline rate; a descriptive change, not a ground-truth accuracy measure.",
+		),
+		_metric(
+			"comparison",
+			"relative_anomaly_count_change",
+			relative_count_change,
+			"proxy",
+			"Relative change in flagged reading count versus baseline; not a measure of detection quality.",
+		),
 	]
 
 

@@ -1,0 +1,2 @@
+status,observations_available,input_rows,valid_rows,invalid_rows,source_file,message
+unavailable,False,0,0,0,C:\Users\hemna\OneDrive\Desktop\COE Project\data\raw\citizen_science_observations.csv,Citizen-science observations are not currently available.
