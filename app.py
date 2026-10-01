@@ -12,6 +12,10 @@ from src.citizen_observations import (
     associate_observations_with_events,
     load_optional_observations,
 )
+from src.environmental_observations import (
+    associate_environmental_observations_with_events,
+    load_optional_environmental_observations,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -186,6 +190,9 @@ readings, readings_error = read_project_data("sensor_readings.csv")
 flow, flow_error = read_project_data("flow_direction.csv")
 units, units_error = read_project_data("industrial_units.csv")
 citizen_observations, citizen_observation_status = load_optional_observations()
+environmental_observations, environmental_observation_status = (
+    load_optional_environmental_observations()
+)
 
 if events is not None:
     events = prepare_timestamps(events, ["start_time", "end_time"])
@@ -403,6 +410,36 @@ if has_columns(filtered_anomalies, ["timestamp", "event_id"], "Anomaly report"):
         )
         chart.update_layout(margin={"l": 10, "r": 10, "t": 50, "b": 10})
         st.plotly_chart(chart, width="stretch")
+        st.subheader("Anomaly readings")
+        st.caption(
+            "Timestamps are UTC. Parameter names include measurement units where supplied."
+        )
+        anomaly_columns = [
+            "event_id",
+            "timestamp",
+            "station_id",
+            "parameter",
+            "value",
+            "anomaly_score",
+            "severity",
+            "reason",
+        ]
+        available_anomaly_columns = [
+            column for column in anomaly_columns if column in filtered_anomalies.columns
+        ]
+        anomaly_table = filtered_anomalies[available_anomaly_columns].rename(
+            columns={
+                "event_id": "Event",
+                "timestamp": "Time (UTC)",
+                "station_id": "Station",
+                "parameter": "Parameter",
+                "value": "Value",
+                "anomaly_score": "Anomaly score",
+                "severity": "Severity",
+                "reason": "Reason",
+            }
+        )
+        st.dataframe(anomaly_table, width="stretch", hide_index=True)
 else:
     unavailable(anomalies_error)
 
@@ -442,8 +479,12 @@ with flow_tab:
 
 st.header("Plausible Sources for Inspection")
 st.caption(
-    "Rankings are inspection candidates based on the recorded evidence. They do not "
-    "establish that a source caused an event."
+    "Explainable plausibility ranking for human inspection. Scores are heuristic priorities, "
+    "not source-identification accuracy, probabilities, or proof of causation."
+)
+st.caption(
+    "Source ground truth is unavailable. Treat each ranking as a plausible source for inspection, "
+    "not an identified cause."
 )
 if has_columns(
     filtered_ranking,
@@ -465,10 +506,11 @@ if has_columns(
         "score",
         "confidence",
         "rank",
-        "upstream_compatibility",
-        "discharge_timing_match",
-        "operating_event_match",
-        "sensor_timing_relationship",
+        "evidence_available",
+        "score_coverage",
+        "evidence_components_available",
+        "evidence_components_unavailable",
+        "evidence_summary",
         "reasons",
     ]
     source_columns = [column for column in source_columns if column in source_table]
@@ -508,16 +550,51 @@ if filtered_events is not None and not filtered_events.empty and filtered_rankin
         selected_evidence = event_candidates[
             event_candidates["source_id"].astype(str) == selected_source_id
         ].iloc[0]
+        if selected_evidence.get("evidence_available") == "Evidence available":
+            st.info(
+                "Evidence available: recorded signals support a plausibility ranking "
+                "for inspection; they do not identify a confirmed source."
+            )
+        else:
+            st.warning(
+                "Evidence unavailable: no source-specific flow, discharge, or operating "
+                "support is available for this candidate."
+            )
+        st.caption(str(selected_evidence.get("evidence_summary", "Evidence availability was not reported.")))
+        st.caption(
+            "Confidence is a configured ranking-priority category, not a probability or accuracy measure."
+        )
         evidence_fields = [
-            ("Upstream compatibility", "upstream_compatibility"),
-            ("Discharge timing match", "discharge_timing_match"),
-            ("Operating event match", "operating_event_match"),
-            ("Sensor timing relationship", "sensor_timing_relationship"),
+            ("Upstream / flow", "upstream_compatibility", "upstream_score_contribution"),
+            ("Discharge timing", "discharge_timing_match", "discharge_timing_score_contribution"),
+            ("Operating event", "operating_event_match", "operating_event_score_contribution"),
+            ("Sensor timing", "sensor_timing_relationship", "sensor_timing_score_contribution"),
         ]
         evidence_columns = st.columns(len(evidence_fields))
-        for column, (label, field) in zip(evidence_columns, evidence_fields):
+        for column, (label, field, contribution_field) in zip(evidence_columns, evidence_fields):
             value = pd.to_numeric(pd.Series([selected_evidence.get(field)]), errors="coerce").iloc[0]
-            column.metric(label, f"{value:.2f}" if pd.notna(value) else "--")
+            contribution = pd.to_numeric(
+                pd.Series([selected_evidence.get(contribution_field)]), errors="coerce"
+            ).iloc[0]
+            column.metric(
+                label,
+                f"{value:.2f}" if pd.notna(value) else "--",
+                delta=(f"score contribution {contribution:.2f}" if pd.notna(contribution) else None),
+            )
+        st.metric("Configured score coverage", f"{float(selected_evidence.get('score_coverage', 0.0)):.0%}")
+        st.caption(
+            "Sensor anomaly details are event context, not industrial-source evidence: "
+            f"{selected_evidence.get('sensor_anomaly_parameter', 'unavailable')} "
+            f"{selected_evidence.get('sensor_anomaly_value', 'unavailable')} "
+            f"({selected_evidence.get('sensor_anomaly_severity', 'severity unavailable')})."
+        )
+        st.caption(
+            "Optional event context: "
+            f"citizen observations={selected_evidence.get('citizen_observation_match_count', 0)}; "
+            "satellite/environmental observations="
+            f"{selected_evidence.get('satellite_environmental_match_count', 0)}. "
+            "These are not assigned to a source candidate."
+        )
         st.write(str(selected_evidence["reasons"]))
 else:
     st.info("Select filters that include an event with source-ranking records.")
@@ -620,6 +697,137 @@ else:
         if citizen_observation_status.get("invalid_rows", 0):
             st.warning(
                 f"{citizen_observation_status['invalid_rows']} observation row(s) need validation. "
+                "Rows are retained and shown with validation issues."
+            )
+
+st.header("SATELLITE / ENVIRONMENTAL EVIDENCE")
+if environmental_observations is None:
+    st.info("Satellite/environmental observations are not currently available.")
+    if environmental_observation_status.get("status") == "invalid":
+        st.caption(str(environmental_observation_status.get("message", "")))
+else:
+    st.caption(
+        "Event associations are labelled supporting environmental evidence. "
+        "They do not prove pollution or identify its source."
+    )
+    if environmental_observations.empty:
+        st.info("The optional observation file is present but contains no observation rows.")
+    else:
+        environmental_view = environmental_observations.copy()
+        if events is not None and {
+            "event_id", "station_id", "start_time", "end_time"
+        }.issubset(events.columns):
+            environmental_view = associate_environmental_observations_with_events(
+                environmental_view, events
+            )
+            associated_environmental = environmental_view[
+                environmental_view["evidence_label"].eq(
+                    "Supporting environmental evidence"
+                )
+            ]
+            st.metric(
+                "Observations associated with an event",
+                len(associated_environmental),
+            )
+        else:
+            environmental_view["event_id"] = pd.NA
+            environmental_view["association_status"] = "event report unavailable"
+            environmental_view["evidence_label"] = pd.NA
+            st.info("Event association is unavailable until pollution event data is present.")
+
+        environmental_filters = st.columns(3)
+        if "station_id" in environmental_view:
+            environmental_stations = sorted(
+                environmental_view["station_id"].dropna().astype(str).unique()
+            )
+            selected_environmental_stations = environmental_filters[0].multiselect(
+                "Observation station",
+                environmental_stations,
+                default=environmental_stations,
+                key="environmental_station_filter",
+            )
+            if environmental_stations:
+                environmental_view = environmental_view[
+                    environmental_view["station_id"].astype(str).isin(
+                        selected_environmental_stations
+                    )
+                ]
+        if "measurement_name" in environmental_view:
+            measurement_names = sorted(
+                environmental_view["measurement_name"].dropna().astype(str).unique()
+            )
+            selected_measurements = environmental_filters[1].multiselect(
+                "Measurement",
+                measurement_names,
+                default=measurement_names,
+                key="environmental_measurement_filter",
+            )
+            if measurement_names:
+                environmental_view = environmental_view[
+                    environmental_view["measurement_name"].astype(str).isin(
+                        selected_measurements
+                    )
+                ]
+        if "observation_time_utc" in environmental_view:
+            environmental_dates = environmental_view[
+                "observation_time_utc"
+            ].dropna().dt.date
+            if not environmental_dates.empty:
+                earliest_environmental_date = min(environmental_dates)
+                latest_environmental_date = max(environmental_dates)
+                environmental_date_selection = environmental_filters[2].date_input(
+                    "Observation date range",
+                    value=(earliest_environmental_date, latest_environmental_date),
+                    min_value=earliest_environmental_date,
+                    max_value=latest_environmental_date,
+                    key="environmental_date_filter",
+                )
+                if (
+                    isinstance(environmental_date_selection, tuple)
+                    and len(environmental_date_selection) == 2
+                ):
+                    environmental_times = environmental_view[
+                        "observation_time_utc"
+                    ].dt.date
+                    environmental_view = environmental_view[
+                        environmental_times.between(
+                            environmental_date_selection[0],
+                            environmental_date_selection[1],
+                        )
+                    ]
+
+        environmental_display_columns = [
+            "observation_id",
+            "observation_time_utc",
+            "station_id",
+            "observation_location",
+            "latitude",
+            "longitude",
+            "measurement_name",
+            "measurement_value",
+            "measurement_unit",
+            "platform",
+            "product_id",
+            "quality_flag",
+            "event_id",
+            "evidence_label",
+            "association_status",
+            "is_valid",
+            "validation_issues",
+        ]
+        environmental_display_columns = [
+            column
+            for column in environmental_display_columns
+            if column in environmental_view.columns
+        ]
+        st.dataframe(
+            environmental_view[environmental_display_columns],
+            width="stretch",
+            hide_index=True,
+        )
+        if environmental_observation_status.get("invalid_rows", 0):
+            st.warning(
+                f"{environmental_observation_status['invalid_rows']} observation row(s) need validation. "
                 "Rows are retained and shown with validation issues."
             )
 

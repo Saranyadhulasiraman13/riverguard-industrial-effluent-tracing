@@ -113,8 +113,9 @@ class PipelineTests(unittest.TestCase):
 
         candidates = pd.DataFrame(_rank_event_candidates(event, data, WEIGHTS))
 
-        self.assertEqual(candidates.loc[0, "upstream_compatibility"], 0.25)
+        self.assertEqual(candidates.loc[0, "upstream_compatibility"], 0.0)
         self.assertEqual(candidates.loc[0, "sensor_timing_relationship"], 0.0)
+        self.assertEqual(candidates.loc[0, "evidence_available"], "Evidence unavailable")
         self.assertNotEqual(candidates.loc[0, "confidence"], "High")
 
     def test_real_pipeline_regression_and_report_generation(self):

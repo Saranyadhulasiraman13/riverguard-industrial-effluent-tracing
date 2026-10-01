@@ -14,8 +14,8 @@ from .source_tracing import (
 
 NO_GROUND_TRUTH = "No validated anomaly or source ground truth exists in the available CSV datasets."
 GROUND_TRUTH_INTERPRETATION = (
-	"No validated ground truth is available; source rankings are plausible "
-	"inspection candidates, not confirmed causal attribution."
+	"Explainable plausibility ranking for human inspection; source ground truth is "
+	"unavailable and source-identification accuracy is not measured."
 )
 
 
@@ -122,11 +122,12 @@ def evaluate_source_ranking(ranking: pd.DataFrame) -> List[Dict[str, object]]:
 	plausible_events = ranking.loc[plausible, "event_id"].nunique()
 	untraceable = event_count - plausible_events
 	return [
-		_metric("source_tracing", "source_ranking_success_rate", plausible_events / event_count if event_count else None, "proxy", "Share of events with at least one flow-supported medium/high-confidence inspection candidate."),
-		_metric("source_tracing", "untraceable_event_rate", untraceable / event_count if event_count else None, "proxy", "Share of events without a flow-supported medium/high-confidence candidate."),
-		_metric("source_tracing", "traceable_events", plausible_events, "proxy", "Count of events with at least one flow-supported inspection candidate."),
-		_metric("source_tracing", "untraceable_events", untraceable, "proxy", "Count of events without a flow-supported inspection candidate."),
+		_metric("source_tracing", "flow_supported_candidate_event_share", plausible_events / event_count if event_count else None, "proxy", "Share of events with at least one flow-supported medium/high-priority candidate for human inspection; not accuracy."),
+		_metric("source_tracing", "untraceable_event_rate", untraceable / event_count if event_count else None, "proxy", "Share of events without a flow-supported medium/high-priority inspection candidate; not source-identification accuracy."),
+		_metric("source_tracing", "events_with_flow_supported_candidates", plausible_events, "proxy", "Count of events with at least one flow-supported inspection candidate."),
+		_metric("source_tracing", "events_without_flow_supported_candidates", untraceable, "proxy", "Count of events without a flow-supported medium/high-priority candidate."),
 		_metric("source_tracing", "ranked_source_candidates", len(ranking), "measured", "Number of source candidates ranked by the executed source-tracing pipeline."),
+		_metric("source_tracing", "interpretation", GROUND_TRUTH_INTERPRETATION, "documented", GROUND_TRUTH_INTERPRETATION),
 		_metric("source_tracing", "top1_accuracy", "not_available", "not_available", NO_GROUND_TRUTH),
 		_metric("source_tracing", "top3_coverage", "not_available", "not_available", NO_GROUND_TRUTH),
 		_metric("source_tracing", "false_attribution_rate", "not_available", "not_available", NO_GROUND_TRUTH),

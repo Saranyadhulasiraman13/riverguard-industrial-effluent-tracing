@@ -13,6 +13,7 @@ from src.anomaly_detection import run_anomaly_pipeline, run_baseline_detector
 from src.anomaly_detection import load_sensor_readings
 from src.data_cleaning import run_cleaning_pipeline
 from src.citizen_observations import write_observation_reports
+from src.environmental_observations import write_environmental_observation_reports
 from src.evaluation import build_experiment_results, save_experiment_results
 from src.source_tracing import run_source_tracing
 
@@ -32,6 +33,9 @@ def run_experiment() -> object:
 	)
 	after = run_anomaly_pipeline(readings, report_path=report_dir / "anomaly_report.csv")
 	write_observation_reports(after["pollution_events"], reports_dir=report_dir)
+	write_environmental_observation_reports(
+		after["pollution_events"], reports_dir=report_dir
+	)
 	ranking = run_source_tracing(
 		events=after["pollution_events"],
 		output_path=report_dir / "source_ranking.csv",
@@ -75,7 +79,7 @@ def run_experiment() -> object:
 	print(results[results["phase"] == "edge_case"].to_string(index=False))
 	print("ERROR ANALYSIS")
 	print("No validated anomaly or source ground truth is present; precision, recall, F1, Top-1, Top-3, and false-attribution rate are unavailable.")
-	print(f"edge_cases_passed={int((edge_results['status'] == 'passed').sum())}; untraceable_events={int(results.loc[(results['metric'] == 'untraceable_events'), 'value'].iloc[0])}")
+	print(f"edge_cases_passed={int((edge_results['status'] == 'passed').sum())}; events_without_flow_supported_candidates={int(results.loc[(results['metric'] == 'events_without_flow_supported_candidates'), 'value'].iloc[0])}")
 	return results
 
 

@@ -1,0 +1,11 @@
+category,status,count,description,evidence_source
+missing_sensor_data,edge_case_check_passed,,Empty-input behavior is checked; this is not a measured count of real sensor outages.,reports/experiment_results.csv: edge_case/missing_sensor_data
+no_matching_discharge,edge_case_check_passed,,An event with no matching scheduled discharge is handled as a manual-inspection case; no field error count is inferred.,reports/experiment_results.csv: edge_case/no_matching_discharge
+missing_discharge_information,test_covered,,Unavailable schedule evidence is represented as unavailable rather than a positive match; no count is measured.,tests/test_source_fusion.py: test_missing_discharge_schedule_is_unavailable_not_a_match
+missing_or_uncertain_flow,edge_case_check_passed,,Missing or conflicting flow does not establish upstream support; no field error count is inferred.,reports/experiment_results.csv: edge_case/missing_or_conflicting_flow
+multiple_plausible_sources,test_covered,,Multiple candidates remain independently ranked; this test is not a measured attribution error count.,tests/test_source_fusion.py: test_multiple_plausible_sources_remain_ranked_independently
+timing_mismatch_or_unsupported_transport,implemented_reason_no_count,,The ranking reason can state that timing does not establish supported transport; the report does not aggregate these cases.,src/source_tracing.py: sensor_reason
+missing_operating_event,test_covered,,Missing operation evidence is unavailable and limits ranking priority; no field error count is measured.,tests/test_source_fusion.py: test_missing_operating_event_is_unavailable_and_caps_high_confidence
+unavailable_citizen_observations,input_unavailable,,The optional genuine citizen-science input is absent; the synthetic raw scenario file is not treated as genuine evidence.,reports/citizen_observations_status.csv
+unavailable_satellite_environmental_observations,input_unavailable,,The optional satellite/environmental input is absent; no observation report is generated.,reports/satellite_environmental_observations_status.csv
+missing_source_ground_truth,not_available,,Validated source-responsibility labels are absent, so source accuracy metrics cannot be calculated.,reports/experiment_results.csv: evaluation/ground_truth_available

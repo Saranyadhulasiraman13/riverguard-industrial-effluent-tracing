@@ -18,16 +18,17 @@ prototype,source_tracing_inputs,"Flow direction, discharge timing, and industria
 comparison,anomaly_reading_count_change,-4,proxy,"Historical detector count minus baseline count; a descriptive change, not a ground-truth accuracy measure.",
 comparison,anomaly_rate_change,-0.08333333333333331,proxy,"Historical detector rate minus baseline rate; a descriptive change, not a ground-truth accuracy measure.",
 comparison,relative_anomaly_count_change,-0.36363636363636365,proxy,Relative change in flagged reading count versus baseline; not a measure of detection quality.,
-source_tracing,source_ranking_success_rate,0.8571428571428571,proxy,Share of events with at least one flow-supported medium/high-confidence inspection candidate.,
-source_tracing,untraceable_event_rate,0.14285714285714285,proxy,Share of events without a flow-supported medium/high-confidence candidate.,
-source_tracing,traceable_events,6,proxy,Count of events with at least one flow-supported inspection candidate.,
-source_tracing,untraceable_events,1,proxy,Count of events without a flow-supported inspection candidate.,
+source_tracing,flow_supported_candidate_event_share,0.8571428571428571,proxy,Share of events with at least one flow-supported medium/high-priority candidate for human inspection; not accuracy.,
+source_tracing,untraceable_event_rate,0.14285714285714285,proxy,Share of events without a flow-supported medium/high-priority inspection candidate; not source-identification accuracy.,
+source_tracing,events_with_flow_supported_candidates,6,proxy,Count of events with at least one flow-supported inspection candidate.,
+source_tracing,events_without_flow_supported_candidates,1,proxy,Count of events without a flow-supported medium/high-priority candidate.,
 source_tracing,ranked_source_candidates,21,measured,Number of source candidates ranked by the executed source-tracing pipeline.,
+source_tracing,interpretation,Explainable plausibility ranking for human inspection; source ground truth is unavailable and source-identification accuracy is not measured.,documented,Explainable plausibility ranking for human inspection; source ground truth is unavailable and source-identification accuracy is not measured.,
 source_tracing,top1_accuracy,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
 source_tracing,top3_coverage,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
 source_tracing,false_attribution_rate,not_available,not_available,No validated anomaly or source ground truth exists in the available CSV datasets.,
 evaluation,ground_truth_available,False,measured,The available datasets contain no validated anomaly or source ground-truth labels.,
-evaluation,interpretation,"No validated ground truth is available; source rankings are plausible inspection candidates, not confirmed causal attribution.",documented,"No validated ground truth is available; source rankings are plausible inspection candidates, not confirmed causal attribution.",
+evaluation,interpretation,Explainable plausibility ranking for human inspection; source ground truth is unavailable and source-identification accuracy is not measured.,documented,Explainable plausibility ranking for human inspection; source ground truth is unavailable and source-identification accuracy is not measured.,
 edge_case,missing_sensor_data,PASS,passed,Insufficient sensor data.,missing_sensor_data
 edge_case,no_matching_discharge,PASS,passed,"Pollution anomaly detected, but no plausible scheduled discharge source was identified. Recommend manual inspection.",no_scheduled_discharge
 edge_case,missing_or_conflicting_flow,PASS,passed,Flow direction unavailable or uncertain. Source attribution confidence reduced.,flow_uncertain
